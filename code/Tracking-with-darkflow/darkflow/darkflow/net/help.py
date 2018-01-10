@@ -11,37 +11,35 @@ import os
 import csv
 import subprocess as sp
 import numpy
-from threading import Thread
+import re
+
 from PIL import Image
-import datetime
 
-flag_pipe = True 
-pt = True;
-
-frame_test_num = 100
+flag_pipe = True
+# add by gongjia
+status_p = 0
 
 old_graph_msg = 'Resolving old graph def {} (no guarantee)'
 
-cmd_out1 = ['ffmpeg',
-    '-y',
-    '-f', 'rawvideo',
-    '-vcodec','rawvideo',
-    '-pix_fmt', 'bgr24',
-#    '-s', '1280x720',
-    '-s', '1920x1080',
-    '-i', '-',
-    '-c:v', 'libx264',
-    '-pix_fmt', 'yuv420p',
-    '-preset', 'ultrafast',
-    '-f', 'flv',
-#    '-r', '18',
-#    'rtmp://127.0.0.1:1935/app/stream']
-#    'rtmp://live.hailigu.com/AppName/StreamName']
-    'rtmp://video-center-bj.alivecdn.com/app/stream?vhost=live.hailigu.com']
 
-
-if flag_pipe:
-    pipe = sp.Popen(cmd_out1, stdin=sp.PIPE)
+def ffmpeg_pipe(self, file):
+    url_head = 'rtmp://video-center-bj.alivecdn.com/app/'
+    url_stream = re.split('\.', file)[0]   # get test from test.avi
+    url_host = '?vhost=live.hailigu.com'
+    url = '%s%s%s' % (url_head, url_stream, url_host)
+    cmd_out1 = ['ffmpeg',
+                '-y',
+                '-f', 'rawvideo',
+                '-vcodec', 'rawvideo',
+                '-pix_fmt', 'bgr24',
+                '-s', '1920x1080',
+                '-i', '-',
+                '-c:v', 'libx264',
+                '-pix_fmt', 'yuv420p',
+                '-preset', 'ultrafast',
+                '-f', 'flv',
+                url]
+    self.pipe = sp.Popen(cmd_out1, stdin=sp.PIPE)
 
 def build_train_op(self):
     self.framework.loss(self.out)
@@ -97,9 +95,32 @@ def _get_fps(self, frame):
     processed = self.framework.postprocess(net_out, frame)
     return timer() - start
 
+def camera_stop(self):
+    global  status_p
+    status_p = 1
+    print ("camera_stop = %d \n" %status_p)
+
+def camera_pause(self):
+    global  status_p
+    status_p = 2
+    print ("camera_pause = %d \n" %status_p)
+
+def camera_resume(self):
+    global  status_p
+    status_p = 0
+    print ("camera_resume = %d \n" %status_p)
+
+def camera_get(self):
+    global  status_p
+    print ("camera_get = %d \n" % status_p)
+    return status_p
+
 def camera(self):
     file = self.FLAGS.demo
     SaveVideo = self.FLAGS.saveVideo
+
+    if flag_pipe:
+        ffmpeg_pipe(self, file)
 
     if self.FLAGS.track :
         if self.FLAGS.tracker == "deep_sort":
@@ -170,7 +191,14 @@ def camera(self):
     #postprocessed = []
     # Loop through frames
     n = 0
+    global status_p
     while camera.isOpened():
+        if status_p == 1:  # esc
+            print("gongjia: Stoped! " )
+            break
+        if status_p == 2:
+            #print("gongjia: Paused! ")
+            continue
         elapsed += 1
         _, frame = camera.read()
         if frame is None:
@@ -184,24 +212,14 @@ def camera(self):
             fgmask = fgbg.apply(frame)
         else :
             fgmask = None
-        
-        #begin = datetime.datetime.now()
         preprocessed = self.framework.preprocess(frame)
-        #end = datetime.datetime.now()
-	#if pt:print "preprocessed time :", end - begin 
-
         buffer_inp.append(frame)
         buffer_pre.append(preprocessed)
         # Only process and imshow when queue is full
         if elapsed % self.FLAGS.queue == 0:
             feed_dict = {self.inp: buffer_pre}
-            #begin = datetime.datetime.now()
             net_out = self.sess.run(self.out, feed_dict)
-            #end = datetime.datetime.now()
-            #if pt:print "forward time :", end - begin
-
             for img, single_out in zip(buffer_inp, net_out):
-        	#begin = datetime.datetime.now()
                 if not self.FLAGS.track :
                     postprocessed = self.framework.postprocess(
                         single_out, img)
@@ -210,21 +228,13 @@ def camera(self):
                         single_out, img,frame_id = elapsed,
                         csv_file=f,csv=writer,mask = fgmask,
                         encoder=encoder,tracker=tracker)
-               
-        	#end = datetime.datetime.now()
-        	#if pt: print "postprocessed time :", end - begin
-
-        	#begin = datetime.datetime.now()
-
                 if SaveVideo:
                     videoWriter.write(postprocessed)
                 if self.FLAGS.display :
                     cv2.imshow('', postprocessed)
                 if flag_pipe:
                     #im = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-                    pipe.stdin.write(postprocessed.tobytes())
-        	#end = datetime.datetime.now()
-        	#if pt:print "write time :", end - begin
+                    self.pipe.stdin.write(postprocessed.tobytes())
 
             # Clear Buffers
             buffer_inp = list()
@@ -248,9 +258,9 @@ def camera(self):
     camera.release()
     if self.FLAGS.display :
         cv2.destroyAllWindows()
-    if flag_pipe: 
-        pipe.stdin.close()
-        pipe.wait()
+    if flag_pipe:
+        self.pipe.stdin.close()
+        self.pipe.wait()
 
 def to_darknet(self):
     darknet_ckpt = self.darknet
@@ -269,3 +279,4 @@ def to_darknet(self):
             layer.h[ph] = None
 
     return darknet_ckpt
+
