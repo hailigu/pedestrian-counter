@@ -21,7 +21,7 @@ ds = True
 
 #line check first
 #line check: line points
-llps = [(628,801), (1879, 983)]     #8.h264
+#llps = [(628,801), (1879, 983)]     #8.h264
 #llps = [(1445, 315), (287, 1059)]   #7.h264
 
 #range check: range points
@@ -163,7 +163,7 @@ def postprocess(self,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None
 	h, w, _ = imgcv.shape
 	thick = int((h + w) // 300)
 	resultsForJSON = []
-
+	llps = [(int(self.FLAGS.x1), int(self.FLAGS.y1)), (int(self.FLAGS.x2), int(self.FLAGS.y2))]
 	if not self.FLAGS.track :
 		for b in boxes:
 			boxResults = self.process_box(b, h, w, threshold)
@@ -263,7 +263,6 @@ def postprocess(self,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None
 					person_count[id_person] = 0
 					dict[id_person] = []
 		
-
 			if self.FLAGS.counter:
 				if id_num not in ids:
 					#line check
