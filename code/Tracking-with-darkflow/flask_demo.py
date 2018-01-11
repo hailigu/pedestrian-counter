@@ -16,7 +16,7 @@ app = Flask(__name__)
 def event_stream():
     count = 0
     # init, add by gongjia
-    handle_p = control_p("test.avi")
+    handle_p = control_p("test.avi", 32,32,720,720)
     while True:
         gevent.sleep(2)
         yield 'data: %s\n\n' % count

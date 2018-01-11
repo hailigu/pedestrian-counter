@@ -9,7 +9,7 @@ from threading import Thread
 import os
 
 class control_p(object):
-    '''api for falsk'''
+    '''api for flask'''
     def __init__(self, filename, x1, y1, x2, y2):
 
         FLAGS = argHandler()
