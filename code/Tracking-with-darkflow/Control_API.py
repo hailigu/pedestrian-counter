@@ -10,7 +10,7 @@ import os
 
 class control_p(object):
     '''api for falsk'''
-    def __init__(self, filename):
+    def __init__(self, filename, x1, y1, x2, y2):
 
         FLAGS = argHandler()
         FLAGS.setDefaults()
@@ -31,6 +31,10 @@ class control_p(object):
         FLAGS.csv = False  # whether to write csv file or not(only when tracking is set to True)
         FLAGS.display = False  # display the tracking or not
         # FLAGS.queue = 10
+        FLAGS.x1 = x1
+        FLAGS.y1 = y1
+        FLAGS.x2 = x2
+        FLAGS.y2 = y2
         self.tfnet = TFNet(FLAGS)
 
     def start_p(self):
@@ -53,7 +57,7 @@ class control_p(object):
 # test demo
 # status:  strat  resume: 0    stop: 1   pause:2
 if __name__ == '__main__':
-    handle_p = control_p("test.avi")
+    handle_p = control_p("test.avi", 32, "720", "720", "720")
     handle_p.start_p()
     count = 0
     test = 0
@@ -66,7 +70,7 @@ if __name__ == '__main__':
             count = 0
             print (test)
 
-        if test == 50:
+        if test == 80:
             test += 1
             handle_p.pause_p()
             status = handle_p.get_p()

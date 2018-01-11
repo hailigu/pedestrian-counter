@@ -27,6 +27,10 @@ class TFNet(object):
 	say = help.say
 	train = flow.train
 	camera = help.camera
+	camera_stop = help.camera_stop
+	camera_pause = help.camera_pause
+	camera_resume = help.camera_resume
+	camera_get = help.camera_get
 	predict = flow.predict
 	return_predict = flow.return_predict
 	to_darknet = help.to_darknet
