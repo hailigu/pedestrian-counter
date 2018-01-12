@@ -31,6 +31,7 @@ class TFNet(object):
 	camera_pause = help.camera_pause
 	camera_resume = help.camera_resume
 	camera_get = help.camera_get
+	camera_set = help.camera_set
 	predict = flow.predict
 	return_predict = flow.return_predict
 	to_darknet = help.to_darknet

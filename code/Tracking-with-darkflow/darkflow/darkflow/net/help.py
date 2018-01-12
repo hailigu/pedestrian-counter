@@ -113,6 +113,11 @@ def camera_get(self):
     global  status_p
     return status_p
 
+def camera_set(self, x1,y1,x2,y2):
+    self.FLAGS.x1 = x1
+    self.FLAGS.y1 = y1
+    self.FLAGS.x2 = x2
+    self.FLAGS.y2 = y2
 def camera(self):
     file = self.FLAGS.demo
     SaveVideo = self.FLAGS.saveVideo

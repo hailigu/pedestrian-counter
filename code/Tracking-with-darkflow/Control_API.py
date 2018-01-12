@@ -12,31 +12,38 @@ class control_p(object):
     '''api for flask'''
     def __init__(self, filename, x1, y1, x2, y2):
 
-        FLAGS = argHandler()
-        FLAGS.setDefaults()
+        self.FLAGS = argHandler()
+        self.FLAGS.setDefaults()
 
-        FLAGS.demo = filename  # video file to use, or if camera just put "camera"
-        FLAGS.model = "darkflow/cfg/yolo.cfg"  # tensorflow model
-        FLAGS.load = "darkflow/bin/yolo.weights"  # tensorflow weights
-        FLAGS.threshold = 0.25  # threshold of decetion confidance (detection if confidance > threshold )
-        FLAGS.gpu = 1  # how much of the GPU to use (between 0 and 1) 0 means use cpu
-        FLAGS.track = True  # wheither to activate tracking or not
-        FLAGS.trackObj = "person"  # the object to be tracked
-        FLAGS.saveVideo = True  # whether to save the video or not
-        FLAGS.BK_MOG = False  # activate background substraction using cv2 MOG substraction,
+        self.FLAGS.demo = filename  # video file to use, or if camera just put "camera"
+        self.FLAGS.model = "darkflow/cfg/yolo.cfg"  # tensorflow model
+        self.FLAGS.load = "darkflow/bin/yolo.weights"  # tensorflow weights
+        self.FLAGS.threshold = 0.25  # threshold of decetion confidance (detection if confidance > threshold )
+        self.FLAGS.gpu = 1  # how much of the GPU to use (between 0 and 1) 0 means use cpu
+        self.FLAGS.track = True  # wheither to activate tracking or not
+        self.FLAGS.trackObj = "person"  # the object to be tracked
+        self.FLAGS.saveVideo = True  # whether to save the video or not
+        self.FLAGS.BK_MOG = False  # activate background substraction using cv2 MOG substraction,
         # to help in worst case scenarion when YOLO cannor predict(able to detect mouvement, it's not ideal but well)
         # helps only when number of detection < 5, as it is still better than no detection.
-        FLAGS.tracker = "deep_sort"  # wich algorithm to use for tracking deep_sort/sort (NOTE : dffpl   eep_sort only trained for people detection )
-        FLAGS.skip = 2  # how many frames to skipp between each detection to speed up the network
-        FLAGS.csv = False  # whether to write csv file or not(only when tracking is set to True)
-        FLAGS.display = False  # display the tracking or not
+        self.FLAGS.tracker = "deep_sort"  # wich algorithm to use for tracking deep_sort/sort (NOTE : dffpl   eep_sort only trained for people detection )
+        self.FLAGS.skip = 2  # how many frames to skipp between each detection to speed up the network
+        self.FLAGS.csv = False  # whether to write csv file or not(only when tracking is set to True)
+        self.FLAGS.display = False  # display the tracking or not
         # FLAGS.queue = 10
-        FLAGS.x1 = x1
-        FLAGS.y1 = y1
-        FLAGS.x2 = x2
-        FLAGS.y2 = y2
-        self.tfnet = TFNet(FLAGS)
+        self.FLAGS.x1 = x1
+        self.FLAGS.y1 = y1
+        self.FLAGS.x2 = x2
+        self.FLAGS.y2 = y2
+        self.tfnet = TFNet(self.FLAGS)
 
+    def setcoo_p(self, x1, y1, x2, y2):
+        #self.FLAGS.x1 = x1
+        #self.FLAGS.y1 = y1
+        #self.FLAGS.x2 = x2
+        #self.FLAGS.y2 = y2
+        #self.tfnet = TFNet(self.FLAGS)
+        self.tfnet.camera_set(x1,y1,x2,y2)
     def start_p(self):
         self.pstart = Thread(target=self.tfnet.camera)
         self.pstart.setDaemon(True)
@@ -57,7 +64,7 @@ class control_p(object):
 # test demo
 # status:  strat  resume: 0    stop: 1   pause:2
 if __name__ == '__main__':
-    handle_p = control_p("test.avi", 32, "720", "720", "720")
+    handle_p = control_p("test.avi", 32, 32, "720", "720")
     handle_p.start_p()
     count = 0
     test = 0
@@ -70,19 +77,10 @@ if __name__ == '__main__':
             count = 0
             print (test)
 
-        if test == 80:
+        if test == 200:
             test += 1
-            handle_p.pause_p()
-            status = handle_p.get_p()
-            print ("status = %d, pause is 2......." % status)
-        elif test == 100:
-            test += 1
-            handle_p.resume_p()
-        elif test == 150:
-            test += 1
-            handle_p.stop_p()
-        elif test ==  200:
-            status = handle_p.get_p()
-            print ("end status = %d......." %status)
-            break
+            #handle_p.pause_p()
+            #status = handle_p.get_p()
+            handle_p.setcoo_p(10, 800, 1800,1000)
+            #break
 
