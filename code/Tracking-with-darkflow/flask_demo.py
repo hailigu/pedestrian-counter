@@ -40,6 +40,7 @@ def sse_request():
 def page():
     return render_template('sse.html')
 
+# curl http://127.0.0.1:8001/my_event_source 
 if __name__ == '__main__':
     http_server = WSGIServer(('127.0.0.1', 8001), app)
     http_server.serve_forever()

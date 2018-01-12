@@ -253,6 +253,7 @@ def camera(self):
             if choice == 27:
                 break
 
+    cv2.imwrite("counter.jpg", postprocessed)
     sys.stdout.write('\n')
     if SaveVideo:
         videoWriter.release()
