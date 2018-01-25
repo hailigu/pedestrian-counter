@@ -10,7 +10,7 @@ import os
 
 class control_p(object):
     '''api for flask'''
-    def __init__(self, filename, x1, y1, x2, y2):
+    def __init__(self, filename, list_xy):
 
         self.FLAGS = argHandler()
         self.FLAGS.setDefaults()
@@ -19,7 +19,7 @@ class control_p(object):
         self.FLAGS.model = "darkflow/cfg/yolo.cfg"  # tensorflow model
         self.FLAGS.load = "darkflow/bin/yolo.weights"  # tensorflow weights
         self.FLAGS.threshold = 0.25  # threshold of decetion confidance (detection if confidance > threshold )
-        self.FLAGS.gpu = 1  # how much of the GPU to use (between 0 and 1) 0 means use cpu
+        self.FLAGS.gpu = 0.9  # how much of the GPU to use (between 0 and 1) 0 means use cpu
         self.FLAGS.track = True  # wheither to activate tracking or not
         self.FLAGS.trackObj = "person"  # the object to be tracked
         self.FLAGS.saveVideo = True  # whether to save the video or not
@@ -31,19 +31,13 @@ class control_p(object):
         self.FLAGS.csv = False  # whether to write csv file or not(only when tracking is set to True)
         self.FLAGS.display = False  # display the tracking or not
         # FLAGS.queue = 10
-        self.FLAGS.x1 = x1
-        self.FLAGS.y1 = y1
-        self.FLAGS.x2 = x2
-        self.FLAGS.y2 = y2
+        self.FLAGS.list_xy = list_xy
+        self.FLAGS.counter = True
         self.tfnet = TFNet(self.FLAGS)
 
-    def setcoo_p(self, x1, y1, x2, y2):
-        #self.FLAGS.x1 = x1
-        #self.FLAGS.y1 = y1
-        #self.FLAGS.x2 = x2
-        #self.FLAGS.y2 = y2
-        #self.tfnet = TFNet(self.FLAGS)
-        self.tfnet.camera_set(x1,y1,x2,y2)
+    def setcoo_p(self, list_xy):
+        self.tfnet.camera_set(list_xy)
+    
     def start_p(self):
         self.pstart = Thread(target=self.tfnet.camera)
         self.pstart.setDaemon(True)
@@ -64,7 +58,9 @@ class control_p(object):
 # test demo
 # status:  strat  resume: 0    stop: 1   pause:2
 if __name__ == '__main__':
-    handle_p = control_p("test.avi", 32, 32, "720", "720")
+    list_xy = [(32,32), (100, 100), (140, 140), (200,200), (100,50),(100,300), (200,58),(200,300)]
+    list_xy2 = [(32,32), (180, 180), (140, 140), (250,250), (100,50),(100,300), (200,58),(200,300)]
+    handle_p = control_p("test.avi", list_xy)
     handle_p.start_p()
     count = 0
     test = 0
@@ -75,12 +71,12 @@ if __name__ == '__main__':
         if count == 999999:
             test += 1
             count = 0
-            print (test)
+            #print (test)
 
-        if test == 200:
+        if test == 300:
             test += 1
             #handle_p.pause_p()
             #status = handle_p.get_p()
-            handle_p.setcoo_p(10, 800, 1800,1000)
+            handle_p.setcoo_p(list_xy2)
             #break
 

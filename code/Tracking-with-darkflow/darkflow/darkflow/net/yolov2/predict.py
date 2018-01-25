@@ -130,7 +130,7 @@ def linecheck(ll, bbox):
 
 		if bcross:
 			break;
-		uu += 1
+		uu += 2
 
 	return bcross
 
@@ -163,7 +163,7 @@ def postprocess(self,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None
 	h, w, _ = imgcv.shape
 	thick = int((h + w) // 300)
 	resultsForJSON = []
-	llps = [(int(self.FLAGS.x1), int(self.FLAGS.y1)), (int(self.FLAGS.x2), int(self.FLAGS.y2))]
+	llps = self.FLAGS.list_xy #(int(self.FLAGS.x1), int(self.FLAGS.y1)), (int(self.FLAGS.x2), int(self.FLAGS.y2))]
 	if not self.FLAGS.track :
 		for b in boxes:
 			boxResults = self.process_box(b, h, w, threshold)
@@ -288,7 +288,7 @@ def postprocess(self,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None
 		while uu < len(lines) -1:
 		        lineThickness = 2
 	        	cv2.line(imgcv, (lines[uu][0], lines[uu][1]), (lines[uu+1][0], lines[uu+1][1]), (0,255,0), lineThickness)
-        		uu += 1
+        		uu += 2
 
 	return imgcv
 
