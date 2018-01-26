@@ -115,7 +115,8 @@ def camera_get(self):
 
 def camera_set(self, list_xy):
     self.FLAGS.list_xy = list_xy
-def camera(self):
+
+def camera(self, callback):
     file = self.FLAGS.demo
     SaveVideo = self.FLAGS.saveVideo
 
@@ -225,7 +226,7 @@ def camera(self):
                         single_out, img)
                 else :
                     postprocessed = self.framework.postprocess(
-                        single_out, img,frame_id = elapsed,
+                        callback, single_out, img,frame_id = elapsed,
                         csv_file=f,csv=writer,mask = fgmask,
                         encoder=encoder,tracker=tracker)
                 if SaveVideo:
@@ -262,6 +263,8 @@ def camera(self):
     if flag_pipe:
         self.pipe.stdin.close()
         self.pipe.wait()
+    # finish
+    callback(-1)
 
 def to_darknet(self):
     darknet_ckpt = self.darknet

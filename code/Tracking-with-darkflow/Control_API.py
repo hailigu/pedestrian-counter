@@ -8,6 +8,29 @@ from darkflow.darkflow.net.build import TFNet
 from threading import Thread
 import os
 
+import threading
+
+
+class WorkerThread(threading.Thread):
+
+    def __init__(self, target, args):
+        super(WorkerThread, self).__init__()
+        self.callback = args
+        self.target = target 
+
+    def run(self):
+        currentTreadname = threading.currentThread()
+        print ("running in %s" %currentTreadname)
+        self.target(self.callback)
+
+def callback(result):
+    if result == -1:
+        print("finished")  # finish
+    print(result)
+
+
+
+
 class control_p(object):
     '''api for flask'''
     def __init__(self, filename, list_xy):
@@ -16,8 +39,8 @@ class control_p(object):
         self.FLAGS.setDefaults()
 
         self.FLAGS.demo = filename  # video file to use, or if camera just put "camera"
-        self.FLAGS.model = "darkflow/cfg/yolo.cfg"  # tensorflow model
-        self.FLAGS.load = "darkflow/bin/yolo.weights"  # tensorflow weights
+        self.FLAGS.model = "darkflow/bin/tiny-yolo-person.cfg"  # tensorflow model
+        self.FLAGS.load = "darkflow/bin/tiny-yolo-person_595.weights"  # tensorflow weights
         self.FLAGS.threshold = 0.25  # threshold of decetion confidance (detection if confidance > threshold )
         self.FLAGS.gpu = 0.9  # how much of the GPU to use (between 0 and 1) 0 means use cpu
         self.FLAGS.track = True  # wheither to activate tracking or not
@@ -39,7 +62,8 @@ class control_p(object):
         self.tfnet.camera_set(list_xy)
     
     def start_p(self):
-        self.pstart = Thread(target=self.tfnet.camera)
+        #self.pstart = WorkerThread(callback)
+        self.pstart = WorkerThread(target=self.tfnet.camera, args=(callback))
         self.pstart.setDaemon(True)
         self.pstart.start()
 

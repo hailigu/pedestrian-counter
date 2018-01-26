@@ -145,7 +145,7 @@ def rangecheck(centerp, verts):
 	return b[0]
 
 
-def postprocess(self,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None,encoder=None,tracker=None):
+def postprocess(self,callback,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None,encoder=None,tracker=None):
 	"""
 	Takes net output, draw net_out, save to disk
 	"""
@@ -277,7 +277,7 @@ def postprocess(self,net_out, im,frame_id = 0,csv_file=None,csv=None,mask = None
 
 		font = cv2.FONT_HERSHEY_TRIPLEX
 		cv2.putText(imgcv, 'count: '+str(len(ids)), (10,70),0, 1e-3 * h, (0,0,255),thick//2)
-
+                callback(len(ids))
 		#draw line 
 		if len(llps) > 0:
 			lines = llps			
